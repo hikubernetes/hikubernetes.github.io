@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Hexo</title>
-  
+  <title>Hikubernetes</title>
+  <icon>https://www.gravatar.com/avatar/691df33b6f9b70cc07805736dfde203b</icon>
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://yoursite.com/"/>
+  <link href="https://www.hiecho.cn/"/>
   <updated>2019-02-26T13:17:39.592Z</updated>
-  <id>http://yoursite.com/</id>
+  <id>https://www.hiecho.cn/</id>
   
   <author>
     <name>chanrbo</name>
-    
+    <email>chanrbo@gmail.com</email>
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
     <title>“文章名称”</title>
-    <link href="http://yoursite.com/2019/02/26/%E2%80%9C%E6%96%87%E7%AB%A0%E5%90%8D%E7%A7%B0%E2%80%9D/"/>
-    <id>http://yoursite.com/2019/02/26/“文章名称”/</id>
+    <link href="https://www.hiecho.cn/2019/02/26/%E2%80%9C%E6%96%87%E7%AB%A0%E5%90%8D%E7%A7%B0%E2%80%9D/"/>
+    <id>https://www.hiecho.cn/2019/02/26/“文章名称”/</id>
     <published>2019-02-26T13:17:39.000Z</published>
     <updated>2019-02-26T13:17:39.592Z</updated>
     
@@ -32,8 +32,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="http://yoursite.com/2019/02/26/hello-world/"/>
-    <id>http://yoursite.com/2019/02/26/hello-world/</id>
+    <link href="https://www.hiecho.cn/2019/02/26/hello-world/"/>
+    <id>https://www.hiecho.cn/2019/02/26/hello-world/</id>
     <published>2019-02-26T09:56:00.871Z</published>
     <updated>2019-02-26T09:56:00.871Z</updated>
     
