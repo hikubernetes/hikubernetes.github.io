@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://www.hiecho.cn/archives/index.html</loc>
+    
+    <lastmod>2019-02-27T06:20:07.079Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://www.hiecho.cn/about-me/index.html</loc>
     
     <lastmod>2019-02-27T06:12:03.210Z</lastmod>
@@ -19,13 +26,6 @@
     <loc>https://www.hiecho.cn/tags/index.html</loc>
     
     <lastmod>2019-02-27T05:07:07.744Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://www.hiecho.cn/2019/02/26/%E2%80%9C%E6%96%87%E7%AB%A0%E5%90%8D%E7%A7%B0%E2%80%9D/</loc>
-    
-    <lastmod>2019-02-26T13:17:39.592Z</lastmod>
     
   </url>
   
