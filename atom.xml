@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.hiecho.cn/"/>
-  <updated>2019-02-28T12:21:38.871Z</updated>
+  <updated>2019-04-04T11:39:00.102Z</updated>
   <id>https://www.hiecho.cn/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Linux 下数据无损动态修改硬盘MBR分区表为GPT</title>
+    <link href="https://www.hiecho.cn/2019/04/04/Linux-%E4%B8%8B%E6%95%B0%E6%8D%AE%E6%97%A0%E6%8D%9F%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9%E7%A1%AC%E7%9B%98MBR%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B8%BAGPT/"/>
+    <id>https://www.hiecho.cn/2019/04/04/Linux-下数据无损动态修改硬盘MBR分区表为GPT/</id>
+    <published>2019-04-04T03:26:22.000Z</published>
+    <updated>2019-04-04T11:39:00.102Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1.简介"></a>1.简介</h2><p> 腾讯云官网中有一篇帮助文档“扩容Linux文件系统，<a href="https://www.qcloud.com/document/product/362/6738" target="_blank" rel="noopener">https://www.qcloud.com/document/product/362/6738</a>，讲解了GPT分区云硬盘扩容后修改分区指引和MBR分区云硬盘扩容后修改分区指引。其中MBR分区扩容下，若扩容后的空间已经大于2TB则不可选择。官网文档没有涉及到MBR的分区扩展到2T以上该怎么处理。</p><p>注：写在文前。不管任何形式的扩容硬盘，最好都事先做好硬盘数据的快照，避免手误或者其他因素造成数据丢失。数据无价！！！</p><h2 id="2-下面讲解数据无损动态调整MBR的分区为GPT"><a href="#2-下面讲解数据无损动态调整MBR的分区为GPT" class="headerlink" title="2.下面讲解数据无损动态调整MBR的分区为GPT"></a>2.下面讲解数据无损动态调整MBR的分区为GPT</h2><p>（1）fdisk -l  /dev/vdb  &amp;&amp; partprobe -s</p><p><img src="https://ask.qcloudimg.com/draft/1188303/2ws82epb4x.png" alt></p><p>（2）下面以/dev/vdc这块盘做讲解，新建了一个/dev/vdc1分区，并且格式化为ext3文件系统。</p><p>fdsik  -l    /dev/vdc   &amp;&amp;    mkfs.ext3   /dev/vdc1</p><p><img src="https://ask.qcloudimg.com/draft/1188303/c5mxi51gar.png" alt></p><p>（3）下面我在控制台把/dev/vdc这块硬盘扩容到2T以上，并且重新挂载。</p><p><img src="https://ask.qcloudimg.com/draft/1188303/jwe2k5j31x.png" alt="image.png"></p><p><img src="https://ask.qcloudimg.com/draft/1188303/1pfh5o34h3.png" alt="image.png"></p><p>（4）接下来看一下，在MBR分区表下，扩容/dev/vdc1到2.5T能不能行？</p><p><img src="https://ask.qcloudimg.com/draft/1188303/2phoeqho44.png" alt></p><p>这里看到只能扩容到2TB。gg</p><p>（5）显然这是MBR分区表的局限。MBR分区表共512个字节。前446字节包括boot loader信息和grub引导信息，还有64字节的磁盘分区信息，以及2个字节的结束标志。而每个主分区要在分区表里占用16字节。所以单个硬盘只能分64/16个主分区。至于为什么每个分区不能超过2TB，请看下图。</p><p><img src="https://ask.qcloudimg.com/draft/1188303/epdswwterx.png" alt="image.png"></p><p>（6）接下来说一下我这个数据无损在线动态调整MBR为GPT方法吧。注：不管是怎么扩容硬盘，扩容前都建议对云硬盘做一下快照。</p><p>A.为了证明数据真的无损，我们新建几个file。最后再来看一下数据情况。</p><p><img src="https://ask.qcloudimg.com/draft/1188303/pumch8ut0w.png" alt="image.png"></p><p><img src="https://ask.qcloudimg.com/draft/1188303/yu6jq2qrwk.png" alt="image.png"></p><p>B.卸载/dev/vdc1</p><p><img src="https://ask.qcloudimg.com/draft/1188303/ysh3qtkbez.png" alt="image.png"></p><p>C.用gdisk(安装方法:yum install gdisk)把MBR分区格式转换程GPT分区格式(MBR不支持2T以上大小)</p><p><img src="https://ask.qcloudimg.com/draft/1188303/m4mmudzdbr.png" alt></p><p>注：这个方法在大部分场景下都是可以转mbr为gpt的，只有磁盘开头前33个扇区，或最后34个扇区被分区占用的场景不支持。我们的硬盘分区时，默认是从2048扇区开始分的，所以一般不会出现前34个扇区被占用，客户控制台扩容实体云硬盘之后，后33扇区也不存在被占用。所以绝大多数情况下前34后33分区都不会被占用。除非客户主动刻意去占用。这里可以通过part ed  硬盘–unit s–p查看硬盘前34分区有没有被占用。</p><p>D.使用parted删除vdc1，并重新创建vdc1(fdisk不支持超过2TB大小，注意记住删除前vdc1的start sector，创建新的vdc1的时候start sector必须和删除前一致)</p><p><img src="https://ask.qcloudimg.com/draft/1188303/o2xq9xys62.png" alt></p><p>E.目前还需要扩展下分区，才能挂载正常显示分区大小。</p><p><img src="https://ask.qcloudimg.com/draft/1188303/wp46xzu7l3.png" alt></p><p>注：这里也可能会遇到下面这种情况</p><p>‘’’</p><p>[root@bobo ~]# e2fsck -yf /dev/vdc1</p><p>e2fsck 1.42.9 (28-Dec-2013)</p><p>The filesystem size (according to the superblock) is xxx blocks</p><p>The physical size of the device is xxx blocks</p><p>Either the superblock or the partition table is likely to be corrupt!</p><p>Abort? yes</p><p>‘’’</p><p>这里是检测到分区表变化了，询问是否放弃修复，并不是报错。这里我加y这个参数的原因在于，如果出现错误直接fix。如果遇到了这种情况，可以直接用这个命令e2fsck -f /dev/vdb1直接修复分区就ok。</p><p>F.重新挂载下看下分区大小,并检查下数据完整性</p><p><img src="https://ask.qcloudimg.com/draft/1188303/y1iweazerj.png" alt></p><h2 id="3-GPT分区的优越性（GUID-partition-table-GPT-磁盘分区表。）"><a href="#3-GPT分区的优越性（GUID-partition-table-GPT-磁盘分区表。）" class="headerlink" title="3.GPT分区的优越性（GUID partition table, GPT 磁盘分区表。）"></a>3.GPT分区的优越性（GUID partition table, GPT 磁盘分区表。）</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">因为过去一个扇区大小就是 512Bytes 而已，不过目前已经有 4K 的扇区设计出现！为了相容于所有的磁盘，因此在扇区的定义上面， 大多会使用所谓的逻辑区块位址（Logical Block Address, LBA）来处理。GPT 将磁盘所有区块以此 LBA（默认为 512Bytes ！） 来规划，而第一个 LBA 称为 LBA0 （从 0 开始编号）。与 MBR 仅使用第一个 512Bytes 区块来纪录不同， GPT 使用了 34 个 LBA 区块来纪录分区信息！同时与过去 MBR 仅有一的区块，被干掉就死光光的情况不同， GPT 除了前面 34 个 LBA 之外，整个磁盘的最后 33 个 LBA 也拿来作为另一个备份！这样或许会比较安全些吧！</span><br></pre></td></tr></table></figure><p><img src="https://ask.qcloudimg.com/draft/1188303/5t19n77idf.png" alt="image.png">     </p><p>结构详解：</p><p>LBA0：和传统MBR分区一样，仍然为主引导记录</p><p>LBA1：我们称之为“主分区头”</p><p>LBA2-33：共计32个扇区，我们称之为“主分区节点”</p><p>LBA-1：我们称之为“备份分区头”，它就是“主分区头”的一个Copy</p><p>LBA-2-33：共计32个扇区，我们称之为“备份分区节点”，它就是“主分区节点”的一个Copy</p><p>LBA34：正常的GPT分区内容，文件系统（如：FAT，NTFS，EXT等）就是构建在这里面。</p><p>大概了解一下:LBA2-LBA33</p><p><img src="https://ask.qcloudimg.com/draft/1188303/i6g67fhi52.png" alt="image.png"></p><h2 id="4-常用的分区处理的工具"><a href="#4-常用的分区处理的工具" class="headerlink" title="4.常用的分区处理的工具"></a>4.常用的分区处理的工具</h2><p>（1）fdisk(MBR)</p><p><img src="https://ask.qcloudimg.com/draft/1188303/a51xfzbahg.png" alt="image.png"></p><p>（2）gdisk(GPT)</p><p><img src="https://ask.qcloudimg.com/draft/1188303/mg50zm4amc.png" alt="image.png"></p><p>（3）parted（MBR和GPT通用）</p><p><img src="https://ask.qcloudimg.com/draft/1188303/1ei1y51aq1.png" alt="image.png"></p><p>注:gdisk和fdisk最好不要混用，不要用fdsik处理gpt分区，也不要用gdisk处理mbr分区，一不小心，数据搞没了，后悔都来不及。</p><p>云+社区链接：<a href="https://cloud.tencent.com/developer/article/1175328" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1175328</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;1-简介&quot;&gt;&lt;a href=&quot;#1-简介&quot; class=&quot;headerlink&quot; title=&quot;1.简介&quot;&gt;&lt;/a&gt;1.简介&lt;/h2&gt;&lt;p&gt; 腾讯云官网中有一篇帮助文档“扩容Linux文件系统，&lt;a href=&quot;https://www.qcloud.com/doc
+      
+    
+    </summary>
+    
+      <category term="Linux" scheme="https://www.hiecho.cn/categories/Linux/"/>
+    
+    
+      <category term="MBR" scheme="https://www.hiecho.cn/tags/MBR/"/>
+    
+      <category term="GPT" scheme="https://www.hiecho.cn/tags/GPT/"/>
+    
+  </entry>
   
   <entry>
     <title>Centos7 升级系统内核</title>
